@@ -85,6 +85,7 @@ menu.post("/add", async (req, res) => {
     const isRestaurantExisted = await Owner.findOne({
       telegramId: restaurantId,
     });
+
     if (!isRestaurantExisted) {
       return res
         .status(400)

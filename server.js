@@ -179,7 +179,36 @@ bot
     process.exit(1);
   });
 
+app.use(
+  express.static(
+    path.join(path.dirname(fileURLToPath(import.meta.url)), "public")
+  )
+);
+
 const PORT = process.env.PORT || 8000;
-app.listen(PORT, () => {
+const expressServer = app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
+});
+
+import { Server } from "socket.io";
+
+const io = new Server(expressServer, {
+  cors: {
+    origin: ["http://localhost:8000", "http://127.0.0.1:8000"],
+  },
+});
+
+io.on("connection", (socket) => {
+  socket.broadcast.emit("welcome", "welcome to telegram");
+
+  socket.on("message", (data) => {
+    io.emit("message", `${socket.id.substring(0, 5)}: ${data}`);
+  });
+
+  socket.on("activity", (data) => {
+    socket.broadcast.emit(
+      "activity",
+      `user ${socket.id.substring(0, 5)} typing...`
+    );
+  });
 });
